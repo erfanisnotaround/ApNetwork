@@ -8,6 +8,8 @@ import org.example.clientofnetwork.model.passingAndRecievingData.client.ClientIn
 import org.example.clientofnetwork.model.passingAndRecievingData.sameInfoes.CommandType;
 import org.example.clientofnetwork.model.responseTypes.LoginDataRes;
 
+import java.util.Map;
+
 public class LoginCommand implements Commendable<LoginDataRes, LoginInformation> {
 
     @Override
@@ -17,13 +19,13 @@ public class LoginCommand implements Commendable<LoginDataRes, LoginInformation>
 
     @Override
     public Object buildArgs(ClientInfo clientInfo, LoginInformation data) {
-
+        return Map.of("username", data.getUsername(), "password", data.getPassword());
     }
 
 
     @Override
     public TypeReference<LoginDataRes> responseType() {
-        return null;
+        return new TypeReference<LoginDataRes>() {};
     }
 
     @Override

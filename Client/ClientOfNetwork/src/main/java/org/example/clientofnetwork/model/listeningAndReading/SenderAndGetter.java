@@ -24,7 +24,7 @@ public class SenderAndGetter implements Communicable{
     private ReaderTCP TcpReaderRuuRunnable;
 
     private Thread TcpWriterThread, TcpReaderThread;
-    private volatile Consumer<String> lineProcessor = s -> {};
+    private volatile Consumer<String> lineProcessor;
     public SenderAndGetter(int port, String host , NetContext netContext) {
         this.port = port;
         this.host = host;
@@ -47,10 +47,11 @@ public class SenderAndGetter implements Communicable{
         TcpWriterRunnable = new WriterTCP(outbound , writer , running);
         TcpReaderRuuRunnable = new ReaderTCP( reader , running);
 
-        TcpReaderRuuRunnable.setOnLine(lineProcessor);
+
         TcpWriterThread = new Thread(TcpWriterRunnable);TcpWriterThread.setDaemon(true);TcpWriterThread.start();
         TcpReaderThread = new Thread(TcpReaderRuuRunnable);TcpReaderThread.setDaemon(true);TcpReaderThread.start();
     }
+    @Override
     public void setLineProcessor(Consumer<String> processor) {
         this.lineProcessor = (processor != null ? processor : s -> {});
         if (TcpReaderRuuRunnable != null) TcpReaderRuuRunnable.setOnLine(this.lineProcessor);

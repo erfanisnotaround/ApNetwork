@@ -19,62 +19,57 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public final class ProtocolProcessor implements java.util.function.Consumer<String>, AutoCloseable {
+import static java.util.Objects.requireNonNull;
+
+public final class ProtocolProcessor implements
+         Consumer<String>, AutoCloseable {
     private final ObjectMapper json;
     private final Communicable transport;
+    private final EnvelopeBuilder envelopeBuilder;
 
     private static final class Pending<R> {
-        final CompletableFuture<EnvelopeData<Void,R>> fut;
         final TypeReference<R> recType;
         final CommandType cmd;
-        Pending(CompletableFuture<EnvelopeData<Void,R>> f, TypeReference<R> t, CommandType c) { this.fut=f; this.recType=t; this.cmd=c; }
+        Pending(TypeReference<R> t, CommandType c) { this.recType=t; this.cmd=c; }
     }
     private final Map<String, Pending<?>> pending = new ConcurrentHashMap<>();
     private volatile String token;
-    private volatile Consumer<EnvelopeData<Void, JsonNode>> notifyHandler = n -> {};
+    private volatile ResponseListener listener = new ResponseListener() {
+        public void onNotify(EnvelopeData<Void, JsonNode> env) {}
+        public void onResponse(String id, CommandType cmd, EnvelopeData<?, ?> env) {}
+    };
 
     public ProtocolProcessor(ObjectMapper json, Communicable transport) {
-        this.json = java.util.Objects.requireNonNull(json);
-        this.transport = java.util.Objects.requireNonNull(transport);
+        this.json = requireNonNull(json);
+        this.transport = requireNonNull(transport);
+        this.envelopeBuilder = new EnvelopeBuilder(json);
+        transport.setLineProcessor(this);
     }
 
     public void setToken(String token) { this.token = token; }
-    public void onNotify(Consumer<EnvelopeData<Void, JsonNode>> h) { this.notifyHandler = (h!=null?h:n->{}); }
+    public void setListener(ResponseListener l) { this.listener = (l!=null? l : this.listener); }
 
-    public <P,R> CompletableFuture<EnvelopeData<Void,R>> send(CommandType cmd, P dataPas, TypeReference<R> recType) {
+
+    public <P,R> String sendReactive(CommandType cmd, P dataPas, TypeReference<R> recType) {
         String id = UUID.randomUUID().toString();
-
-        ObjectNode root = json.createObjectNode();
-        root.put("id", id);
-        root.put("kindOfCommunication", KindOfCommunication.REQUEST.name());
-        root.put("commandType", cmd.name());
-        if (token != null) root.put("token", token);
-        root.put("ts", java.time.Instant.now().toString());
-        if (dataPas != null) root.set("dataPas", json.valueToTree(dataPas));
-
-        var fut = new CompletableFuture<EnvelopeData<Void,R>>();
-        pending.put(id, new Pending<>(fut, recType, cmd));
-
-        try {
-            transport.addString(json.writeValueAsString(root));
-        } catch (Exception e) {
-            pending.remove(id);
-            fut.completeExceptionally(e);
-        }
-        fut.orTimeout(10, TimeUnit.SECONDS).whenComplete((ok, ex)->{ if (ex!=null) pending.remove(id); });
-        return fut;
+        pending.put(id, new Pending<>(recType, cmd));
+        String payload = envelopeBuilder.buildRequest(id, cmd, token, dataPas);
+        transport.addString(payload); // one-line JSON; WriterTCP appends '\n'
+        return id;
     }
 
     @Override public void accept(String rawLine) {
         try {
-            JsonNode root = json.readTree(rawLine);
-            var kind = KindOfCommunication.valueOf(root.path("kindOfCommunication").asText());
+            var root = json.readTree(rawLine);
+            var kind = KindOfCommunication
+                    .valueOf(root.path("kindOfCommunication").asText());
 
             if (kind == KindOfCommunication.NOTIFY) {
-                TypeFactory tf = json.getTypeFactory();
-                JavaType envNotifyType = tf.constructParametricType(EnvelopeData.class, Void.class, JsonNode.class);
-                EnvelopeData<Void, JsonNode> n = json.convertValue(root, envNotifyType);
-                notifyHandler.accept(n);
+                var tf = json.getTypeFactory();
+                var envType = tf.constructParametricType(EnvelopeData.class, Void.class,
+                        JsonNode.class);
+                EnvelopeData<Void, JsonNode> n = json.convertValue(root, envType);
+                listener.onNotify(n);
                 return;
             }
             if (kind != KindOfCommunication.RESPONSE) return;
@@ -84,33 +79,22 @@ public final class ProtocolProcessor implements java.util.function.Consumer<Stri
             Pending<?> p = pending.remove(id);
             if (p == null) return;
 
-            completeTyped(p, root);
+            completeTypedAndDispatch(id, p, root);
 
-        } catch (Exception ignore) { /* optional log */ }
+        } catch (Exception ignore) { /* optionally log */ }
     }
 
-    private <R> void completeTyped(Pending<R> p, JsonNode root) {
+    private <R> void completeTypedAndDispatch(String id, Pending<R> p, JsonNode root) {
         try {
-            TypeFactory tf = json.getTypeFactory();
-
-            // R as JavaType, built from your stored TypeReference<R>
-            JavaType rType    = tf.constructType(p.recType);        // R
-
-            JavaType voidType = tf.constructType(Void.class);       // Void
-
-            JavaType envType  = tf.constructParametricType(
-                    EnvelopeData.class, voidType, rType);
-
+            var tf = json.getTypeFactory();
+            var rType    = tf.constructType(p.recType);
+            var envType  = tf.constructParametricType(EnvelopeData.class, tf.constructType(Void.class), rType);
             EnvelopeData<Void, R> env = json.convertValue(root, envType);
-
-            p.fut.complete(env);
+            listener.onResponse(id, p.cmd, env);
         } catch (Exception ex) {
-            p.fut.completeExceptionally(ex);
+            // If deserialization fails, you can route an error envelope or log it.
         }
     }
 
-    @Override public void close() {
-        pending.values().forEach(p -> p.fut.completeExceptionally(new CancellationException("closing")));
-        pending.clear();
-    }
+    @Override public void close() { pending.clear(); }
 }

@@ -17,9 +17,6 @@ public class ReaderTCP implements Runnable {
         this.reader = reader;
         this.running = running;
 
-        onLine = line -> {
-
-        };
     }
     public void setOnLine(Consumer<String> onLine) { this.onLine = (onLine != null ? onLine : s -> {}); }
     @Override

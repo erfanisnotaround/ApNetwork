@@ -24,7 +24,7 @@ public final class ListBoardsHandler implements CommandHandler<BoardListPass, Bo
     private List<BoardSummary> getBoards(List<Board> boards) {
         List<BoardSummary> boardSummaries = new ArrayList<>();
         for (Board board : boards) {
-            boardSummaries.add(new BoardSummary(board.getName() , board.getId()));
+            boardSummaries.add(new BoardSummary(board.getBoardName() , board.getBoardId()));
         }
         return boardSummaries;
     }

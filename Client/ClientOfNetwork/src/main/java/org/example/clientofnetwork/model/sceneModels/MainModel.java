@@ -6,20 +6,23 @@ import org.example.clientofnetwork.PositionStatus;
 import org.example.clientofnetwork.model.agents.screenChanging.SceneManager;
 import org.example.clientofnetwork.model.boardRelated.BoardSummary;
 import org.example.clientofnetwork.model.commands.CommandManager;
+import org.example.clientofnetwork.model.commands.buildInfo.AddingUserToTheBoardPass;
 import org.example.clientofnetwork.model.commands.buildInfo.BoardListPass;
+import org.example.clientofnetwork.model.commands.commandTypes.AddUserToTheBoardCommand;
 import org.example.clientofnetwork.model.commands.commandTypes.ListBoardCommand;
 import org.example.clientofnetwork.model.commands.commandTypes.CreateBoardCommand;
 import org.example.clientofnetwork.model.commands.buildInfo.CreateBoardPass;
 import org.example.clientofnetwork.model.passingAndRecievingData.client.ClientInfo;
 import org.example.clientofnetwork.model.responseTypes.BoardListRes;
 import org.example.clientofnetwork.model.responseTypes.CreateBoardRes;
+import org.example.clientofnetwork.model.sceneInformation.BoardChanging;
 
 import java.util.List;
 import java.util.Objects;
 
 public final class MainModel {
 
-    /** View port keeps the controller thin (SRP, DIP). */
+
     public interface View {
         void showBoards(List<BoardSummary> boards);
         void showEmpty();
@@ -50,7 +53,7 @@ public final class MainModel {
                         this::onBoardsSuccess,
                         err -> fx(() -> view.setStatus("Load failed: " + err))
                 ),
-                new BoardListPass(clientInfo.getUserName()) // LIST_BOARDS has no pass
+                new BoardListPass(clientInfo.getId()) // LIST_BOARDS has no pass
         );
     }
 
@@ -71,22 +74,22 @@ public final class MainModel {
         }
     }
 
-    /** Per-row: Open board */
+
     public void onOpenBoard(BoardSummary b) {
         fx(() -> view.setStatus("Opening \"" + b.getBoardName() + "\"..."));
-        // If you need a VIEW_BOARD command, send it here; then:
+
         fx(() -> {
             view.openBoardScene(b);
             scenes.switchScreen(PositionStatus.BOARD_VIEW);
         });
     }
 
-    /** Per-row: Invite */
+
     public void onInvite(BoardSummary b) {
         fx(() -> view.openInviteDialog(b));
     }
 
-    /** Right-side: Logout */
+
     public void onLogout() {
         fx(() -> {
             view.setStatus("Logging out...");
@@ -94,7 +97,6 @@ public final class MainModel {
         });
     }
 
-    /** Right-side: Create Board (called after dialog OK) */
     public void onCreateBoard(String name) {
         if (name == null || name.isBlank()) { fx(() -> view.setStatus("Board name required")); return; }
         fx(() -> view.setStatus("Creating board..."));
@@ -104,17 +106,34 @@ public final class MainModel {
                         this::onCreateBoardSuccess,
                         err -> fx(() -> view.setStatus("Create failed: " + err))
                 ),
-                new CreateBoardPass(name , clientInfo.getUserName())
+                new CreateBoardPass(name , clientInfo.getId())
         );
     }
 
+    public void onInviteConfirm(BoardSummary board, String username) {
+        if (board == null || username == null || username.isBlank()) {
+            fx(() -> view.setStatus("Invite requires a username."));
+            return;
+        }
+        fx(() -> view.setStatus("Inviting " + username + " to " + board.getBoardName() + "..."));
+
+        commands.send(
+                new AddUserToTheBoardCommand(
+                        res -> fx(() -> view.setStatus("Invite sent to " + username)),
+                        err -> fx(() -> view.setStatus("Invite failed: " + err))
+                ),
+                new AddingUserToTheBoardPass(board.getBoardId(), username)
+        );
+    }
     private void onCreateBoardSuccess(CreateBoardRes res) {
-        // Adapt getters to your DTO if names differ
-        BoardSummary created = new BoardSummary(res.getBoardId(), res.getName());
+
+        BoardSummary created = new BoardSummary();
+        created.setBoardName(res.getBoardName());
+        created.setBoardId(res.getBoardId());
         fx(() -> {
             view.setStatus("Board created: " + created.getBoardName());
             view.openBoardScene(created);
-            scenes.switchScreen(PositionStatus.BOARD_VIEW);
+            scenes.switchScreen(PositionStatus.BOARD_VIEW , new BoardChanging(commands , clientInfo , created));
         });
     }
 

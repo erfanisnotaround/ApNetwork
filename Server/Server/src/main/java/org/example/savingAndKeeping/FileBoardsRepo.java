@@ -31,7 +31,8 @@ public final class FileBoardsRepo implements BoardsRepo {
         rw.writeLock().lock();
         try {
             var b = new Board(UUID.randomUUID().toString(), name, ownerId);
-            byId.put(b.getId(), b);
+            byId.put(b.getBoardId(), b);
+            b.getMembers().add(ownerId);
             persistUnsafe(); return b;
         } finally { rw.writeLock().unlock(); }
     }
@@ -56,7 +57,7 @@ public final class FileBoardsRepo implements BoardsRepo {
         rw.writeLock().lock();
         try {
             var b = byId.get(boardId); if (b==null) return null;
-            boolean added = b.getMembers().add(userId);
+            boolean added = b.getMembers().add(inviteeId);
             if (added) persistUnsafe();
             return b;
         } finally { rw.writeLock().unlock(); }
@@ -70,7 +71,7 @@ public final class FileBoardsRepo implements BoardsRepo {
         try {
             List<Board> all = M.readValue(file.toFile(), LIST);
             byId.clear();
-            for (Board b: all) byId.put(b.getId(), b);
+            for (Board b: all) byId.put(b.getBoardId(), b);
         } catch (Exception e) { throw new RuntimeException("load boards", e); }
         finally { rw.writeLock().unlock(); }
     }

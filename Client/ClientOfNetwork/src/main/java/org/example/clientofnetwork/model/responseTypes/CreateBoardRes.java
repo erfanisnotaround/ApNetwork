@@ -1,10 +1,16 @@
 package org.example.clientofnetwork.model.responseTypes;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateBoardRes {
     private final String boardName;
     private final String boardId;
 
-    public CreateBoardRes(String boardName , String boardId) {
+    @JsonCreator
+    public CreateBoardRes(@JsonProperty("boardName") String boardName ,@JsonProperty("boardId") String boardId) {
         this.boardName = boardName;
         this.boardId = boardId;
     }

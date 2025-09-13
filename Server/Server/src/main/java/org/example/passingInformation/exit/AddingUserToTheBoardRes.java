@@ -1,4 +1,4 @@
-package org.example.clientofnetwork.model.responseTypes;
+package org.example.passingInformation.exit;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

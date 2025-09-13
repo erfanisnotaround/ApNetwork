@@ -1,18 +1,23 @@
 package org.example.clientofnetwork.model.boardRelated;
 
+
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BoardSummary {
-    private final String boardName;
-    private final String boardId;
+    @JsonProperty("boardId")
+    private String boardId;
 
-    public BoardSummary(String boardName, String boardId) {
-        this.boardName = boardName;
-        this.boardId = boardId;
-    }
+    @JsonProperty("boardName")
+    private String boardName;
 
-    public String getBoardName() {
-        return boardName;
-    }
-    public String getBoardId() {
-        return boardId;
-    }
+    public BoardSummary() { } // Needed for Jackson
+
+    public String getBoardId()   { return boardId; }
+    public void setBoardId(String boardId) { this.boardId = boardId; }
+
+    public String getBoardName() { return boardName; }
+    public void setBoardName(String boardName) { this.boardName = boardName; }
 }

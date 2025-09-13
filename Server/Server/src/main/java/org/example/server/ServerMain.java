@@ -32,6 +32,7 @@ public final class ServerMain {
         bus.register(CommandType.VIEW_BOARD,   ViewBoardPass.class,   ViewBoardRes.class,   new ViewBoardHandler());
         bus.register(CommandType.ADD_TASK,     AddTaskPass.class,     AddTaskRes.class,     new AddTaskHandler());
         bus.register(CommandType.REGISTER , RegisterPass.class,       RegisterRes.class,     new RegisterHandler());
+        bus.register(CommandType.ADD_USER_TO_BOARD , AddingUserToTheBoardPass.class, AddingUserToTheBoardRes.class, new AddingUserToTheBoardHandler());
 // … etc
 
         // bus.register(CommandType.LIST_TASKS, new ListTasksHandler()); etc.

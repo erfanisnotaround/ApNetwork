@@ -9,7 +9,6 @@ import java.util.List;
 public class BoardListRes {
     private List<BoardSummary> boards;
 
-    public BoardListRes() {}
 
     @JsonCreator
     public BoardListRes(@JsonProperty("boards") List<BoardSummary> boards) {

@@ -12,7 +12,7 @@ public final class InMemoryBoardsRepo implements BoardsRepo {
     private final ConcurrentHashMap<String, Board> store = new ConcurrentHashMap<>();
     @Override public Board create(String name, String ownerId){
         var b = new Board(UUID.randomUUID().toString(), name, ownerId);
-        store.put(b.getId(), b); return b;
+        store.put(b.getBoardId(), b); return b;
     }
     @Override public Board byId(String id){ return store.get(id); }
     @Override public List<Board> forUser(String userId){

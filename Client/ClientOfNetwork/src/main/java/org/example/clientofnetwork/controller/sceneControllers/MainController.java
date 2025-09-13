@@ -20,6 +20,7 @@ import org.example.clientofnetwork.model.passingAndRecievingData.client.ClientIn
 import org.example.clientofnetwork.model.sceneModels.MainModel;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public final class MainController implements Maker, ControlledScreen,
@@ -64,10 +65,11 @@ public final class MainController implements Maker, ControlledScreen,
         // Wire pane actions to model
         boardListPane.setActions(new BoardListPane.Actions() {
             @Override public Consumer<BoardSummary> onOpenBoard() { return model::onOpenBoard; }
-            @Override public java.util.function.BiConsumer<BoardSummary, Void> onInvite() {
+            @Override public BiConsumer<BoardSummary, Void> onInvite() {
                 return (b, v) -> model.onInvite(b);
             }
         });
+
 
         // Right side buttons
         showBoardsBtn.setOnAction(e -> model.onShowBoards());
@@ -91,15 +93,18 @@ public final class MainController implements Maker, ControlledScreen,
         dialog.onOk((username, extra) -> {
             if (username.isBlank()) { dialog.setStatus("Username required"); return; }
             dialog.setStatus("Sending invite…");
-            // TODO: execute InviteToBoard command here (board.getBoardId(), username)
-            dialog.setStatus("Invite sent"); dialog.close();
+
+            // ⬇️ Send the command via the model:
+            model.onInviteConfirm(board, username);
+
+            dialog.close();
             setStatus("Invited " + username + " to " + board.getBoardName());
         });
         dialog.onCancel(v -> dialog.close());
         dialog.show();
     }
 
-    /* ===== Create Board dialog → calls model.onCreateBoard(...) ===== */
+
     private void openCreateBoardDialog() {
         var dlg = new TwoFieldDialog(scenes.getStage(), scenes);
         dlg.setTitle("Create Board");

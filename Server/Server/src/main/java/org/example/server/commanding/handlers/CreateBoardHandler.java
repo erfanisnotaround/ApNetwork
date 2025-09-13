@@ -11,8 +11,9 @@ public final class CreateBoardHandler implements CommandHandler<CreateBoardPass,
         var user = ctx.requireUser(env); if (user==null) return;
         CreateBoardPass pass = env.getDataPas();
         CreateBoardRes res = env.dataRec;
-        String name = pass.boardId;
-        var board = ctx.services.boards.create(name, pass.userId);
-        ctx.ok(env, env.dataRec, "board_created");
+        String name = pass.getBoardName();
+        var board = ctx.services.boards.create(name, pass.getOwner());
+//        board.getMembers().add();
+        ctx.ok(env, new CreateBoardRes(board.getBoardName() , board.getBoardId()), "board_created");
     }
 }

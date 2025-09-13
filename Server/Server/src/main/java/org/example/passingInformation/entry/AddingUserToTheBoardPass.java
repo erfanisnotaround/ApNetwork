@@ -1,4 +1,4 @@
-package org.example.clientofnetwork.model.commands.buildInfo;
+package org.example.passingInformation.entry;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

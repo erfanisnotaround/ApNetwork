@@ -5,7 +5,7 @@ import org.example.clientofnetwork.model.passingAndRecievingData.EnvelopeData;
 import org.example.clientofnetwork.model.passingAndRecievingData.client.ClientInfo;
 import org.example.clientofnetwork.model.passingAndRecievingData.sameInfoes.CommandType;
 
-public interface Commendable<R , T>{
+public interface Commendable<T , R>{
     CommandType type();
 
     Object buildArgs(ClientInfo clientInfo , T data);

@@ -8,11 +8,12 @@ public class EnvelopeData <PassType , RecType>{
 
     private String userName;
     private String password;
-    private org.example.sameInfoes.KindOfCommunication kindOfCommunication;
-    private org.example.sameInfoes.CommandType commandType;
+    private String id;
+    private KindOfCommunication kindOfCommunication;
+    private CommandType commandType;
     private String token;
     private String message;
-    private org.example.sameInfoes.CommandResponseStatus status;
+    private CommandResponseStatus status;
     private String code;
 
     private PassType dataPas;
@@ -99,4 +100,11 @@ public class EnvelopeData <PassType , RecType>{
         this.code = code;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }

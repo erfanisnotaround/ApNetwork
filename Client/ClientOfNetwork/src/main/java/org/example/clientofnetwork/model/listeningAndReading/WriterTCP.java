@@ -25,7 +25,7 @@ public class WriterTCP implements Runnable {
         try {
             while (running.get()) {
                 String line = outbound.take();
-                writer.write(line); writer.write('\n'); writer.flush();
+                 writer.write(line); writer.write('\n'); writer.flush();
             }
         } catch (InterruptedException | IOException ignore) {
         } finally { running.set(false); }

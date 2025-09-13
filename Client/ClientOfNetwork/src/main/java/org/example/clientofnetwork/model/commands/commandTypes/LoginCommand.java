@@ -1,40 +1,46 @@
 package org.example.clientofnetwork.model.commands.commandTypes;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.example.clientofnetwork.controller.uiChanging.types.interfaces.CommandPresenter;
 import org.example.clientofnetwork.model.commands.Commendable;
-import org.example.clientofnetwork.model.commands.buildInfo.LoginInformation;
+import org.example.clientofnetwork.model.commands.buildInfo.LoginPass;
 import org.example.clientofnetwork.model.passingAndRecievingData.EnvelopeData;
 import org.example.clientofnetwork.model.passingAndRecievingData.client.ClientInfo;
 import org.example.clientofnetwork.model.passingAndRecievingData.sameInfoes.CommandType;
-import org.example.clientofnetwork.model.responseTypes.LoginDataRes;
+import org.example.clientofnetwork.model.responseTypes.LoginRes;
 
-import java.util.Map;
+public class LoginCommand implements Commendable<LoginPass, LoginRes> {
 
-public class LoginCommand implements Commendable<LoginDataRes, LoginInformation> {
 
+    CommandPresenter<LoginRes> loginPresenter;
+
+    public LoginCommand(CommandPresenter<LoginRes> loginPresenter) { this.loginPresenter = loginPresenter; }
     @Override
     public CommandType type() {
-        return null;
+        return CommandType.LOGIN;
     }
 
     @Override
-    public Object buildArgs(ClientInfo clientInfo, LoginInformation data) {
-        return Map.of("username", data.getUsername(), "password", data.getPassword());
+    public Object buildArgs(ClientInfo clientInfo, LoginPass data) {
+        return data;
     }
 
 
     @Override
-    public TypeReference<LoginDataRes> responseType() {
-        return new TypeReference<LoginDataRes>() {};
+    public TypeReference<LoginRes> responseType() {
+        return new TypeReference<LoginRes>() {};
     }
 
     @Override
-    public void onSuccess(EnvelopeData<Void, LoginDataRes> env, ClientInfo clientInfo) {
+    public void onSuccess(EnvelopeData<Void, LoginRes> env, ClientInfo clientInfo) {
+        var res = env.getDataRec();
 
+        loginPresenter.showSuccess(env.getDataRec());
     }
 
     @Override
-    public void onFailure(EnvelopeData<Void, LoginDataRes> env, ClientInfo clientInfo) {
-
+    public void onFailure(EnvelopeData<Void, LoginRes> env, ClientInfo clientInfo) {
+        var msg = (env.getMessage() != null ? env.getMessage() : "Login failed");
+        loginPresenter.showFailure(msg);
     }
 }

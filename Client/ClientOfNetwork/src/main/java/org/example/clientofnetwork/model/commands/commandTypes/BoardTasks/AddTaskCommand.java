@@ -8,7 +8,7 @@ import org.example.clientofnetwork.model.passingAndRecievingData.client.ClientIn
 import org.example.clientofnetwork.model.passingAndRecievingData.sameInfoes.CommandType;
 import org.example.clientofnetwork.model.responseTypes.responseBoardInfo.AddTaskDAtaRes;
 
-public class AddTaskCommand implements Commendable<AddTaskDAtaRes , AddTaskInfo> {
+public class AddTaskCommand implements Commendable<AddTaskInfo , AddTaskDAtaRes> {
     @Override
     public CommandType type() {
         return null;

@@ -11,7 +11,7 @@ public final class InMemoryUsersRepo implements UsersRepo {
     private final ConcurrentHashMap<String,User> byName = new ConcurrentHashMap<>();
     @Override public User create(String username, String salt, String passHash) {
         if (byName.containsKey(username)) return null;
-        User u = new User(UUID.randomUUID().toString() , username, salt, passHash);
+        User u = new User(UUID.randomUUID().toString() , username, salt, passHash , UUID.randomUUID().toString());
         byName.put(username,u); byId.put(u.getId(),u); return u;
     }
     @Override public User byUsername(String username){ return byName.get(username); }

@@ -1,4 +1,4 @@
 package org.example.clientofnetwork.model.responseTypes;
 
-public class BoardListDataRes {
+public class AddingUserToTheBoardRes {
 }

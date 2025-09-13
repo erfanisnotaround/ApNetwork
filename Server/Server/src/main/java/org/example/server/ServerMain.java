@@ -3,6 +3,8 @@ package org.example.server;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Networking.TcpLineServer;
 import org.example.core.port.*;
+import org.example.passingInformation.entry.*;
+import org.example.passingInformation.exit.*;
 import org.example.sameInfoes.CommandType;
 import org.example.savingAndKeeping.FileBoardsRepo;
 import org.example.savingAndKeeping.FileTasksRepo;
@@ -11,9 +13,6 @@ import org.example.server.commanding.CommandBus;
 import org.example.server.commanding.handlers.*;
 import org.example.server.helpers.*;
 import org.example.writingAssistant.JacksonEnvelopeCodec;
-import org.example.writingAssistant.repository.InMemoryBoardsRepo;
-import org.example.writingAssistant.repository.InMemoryTasksRepo;
-import org.example.writingAssistant.repository.InMemoryUsersRepo;
 
 import java.nio.file.Path;
 
@@ -27,12 +26,14 @@ public final class ServerMain {
 
         // Command bus + handlers (OCP)
         var bus = new CommandBus();
-        bus.register(CommandType.REGISTER,      new RegisterHandler());
-        bus.register(CommandType.LOGIN,         new LoginHandler());
-        bus.register(CommandType.CREATE_BOARD,  new CreateBoardHandler());
-        bus.register(CommandType.LIST_BOARDS,   new ListBoardsHandler());
-        bus.register(CommandType.VIEW_BOARD,    new ViewBoardHandler());
-        bus.register(CommandType.ADD_TASK,      new AddTaskHandler());
+        bus.register(CommandType.LOGIN,        LoginPass.class,       LoginRes.class,       new LoginHandler());
+        bus.register(CommandType.CREATE_BOARD, CreateBoardPass.class, CreateBoardRes.class, new CreateBoardHandler());
+        bus.register(CommandType.LIST_BOARDS,  BoardListPass.class,            BoardListRes.class,  new ListBoardsHandler());
+        bus.register(CommandType.VIEW_BOARD,   ViewBoardPass.class,   ViewBoardRes.class,   new ViewBoardHandler());
+        bus.register(CommandType.ADD_TASK,     AddTaskPass.class,     AddTaskRes.class,     new AddTaskHandler());
+        bus.register(CommandType.REGISTER , RegisterPass.class,       RegisterRes.class,     new RegisterHandler());
+// … etc
+
         // bus.register(CommandType.LIST_TASKS, new ListTasksHandler()); etc.
 
         // Protocol controller

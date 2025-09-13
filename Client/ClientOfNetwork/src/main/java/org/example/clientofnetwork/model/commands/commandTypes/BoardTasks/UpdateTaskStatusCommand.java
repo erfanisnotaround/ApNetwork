@@ -8,7 +8,7 @@ import org.example.clientofnetwork.model.passingAndRecievingData.client.ClientIn
 import org.example.clientofnetwork.model.passingAndRecievingData.sameInfoes.CommandType;
 import org.example.clientofnetwork.model.responseTypes.responseBoardInfo.UpdateTaskStatusDateRes;
 
-public class UpdateTaskStatusCommand implements Commendable<UpdateTaskStatusDateRes , UpdateTaskStatusInfo> {
+public class UpdateTaskStatusCommand implements Commendable<UpdateTaskStatusInfo , UpdateTaskStatusDateRes > {
 
     @Override
     public CommandType type() {

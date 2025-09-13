@@ -19,6 +19,7 @@ public final class RegisterHandler implements CommandHandler<RegisterPass , Regi
         var hash = AuthService.PasswordHasher.hash(pw, salt);
         if (ctx.services.users.byUsername(u) != null) { ctx.fail(env, "user_exists", "username already exists"); return; }
         var user = ctx.services.users.create(u, salt, hash);
-        ctx.ok(env, res, "registered");
+
+        ctx.ok(env, new RegisterRes(user.getToken()), "registered");
     }
 }

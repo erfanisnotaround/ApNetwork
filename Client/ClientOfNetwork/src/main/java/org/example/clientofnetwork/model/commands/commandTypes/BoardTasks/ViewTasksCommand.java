@@ -8,7 +8,7 @@ import org.example.clientofnetwork.model.passingAndRecievingData.client.ClientIn
 import org.example.clientofnetwork.model.passingAndRecievingData.sameInfoes.CommandType;
 import org.example.clientofnetwork.model.responseTypes.responseBoardInfo.ViewTasksDataRes;
 
-public class ViewTasksCommand implements Commendable<ViewTasksDataRes , ViewTasksInfo> {
+public class ViewTasksCommand implements Commendable<ViewTasksInfo , ViewTasksDataRes> {
     @Override
     public CommandType type() {
         return null;

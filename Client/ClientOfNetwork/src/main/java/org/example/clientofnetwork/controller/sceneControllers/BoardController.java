@@ -1,4 +1,4 @@
-package org.example.clientofnetwork.controller;
+package org.example.clientofnetwork.controller.sceneControllers;
 
 public class BoardController {
 }

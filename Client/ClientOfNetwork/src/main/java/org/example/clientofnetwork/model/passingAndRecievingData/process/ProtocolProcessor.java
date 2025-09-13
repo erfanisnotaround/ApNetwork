@@ -27,6 +27,10 @@ public final class ProtocolProcessor implements
     private final Communicable transport;
     private final EnvelopeBuilder envelopeBuilder;
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     private static final class Pending<R> {
         final TypeReference<R> recType;
         final CommandType cmd;
@@ -34,6 +38,7 @@ public final class ProtocolProcessor implements
     }
     private final Map<String, Pending<?>> pending = new ConcurrentHashMap<>();
     private volatile String token;
+    private volatile String username;
     private volatile ResponseListener listener = new ResponseListener() {
         public void onNotify(EnvelopeData<Void, JsonNode> env) {}
         public void onResponse(String id, CommandType cmd, EnvelopeData<?, ?> env) {}
@@ -50,16 +55,17 @@ public final class ProtocolProcessor implements
     public void setListener(ResponseListener l) { this.listener = (l!=null? l : this.listener); }
 
 
-    public <P,R> String sendReactive(CommandType cmd, P dataPas, TypeReference<R> recType) {
+    public <P,R> String sendReactive(CommandType cmd , P dataPas, TypeReference<R> recType) {
         String id = UUID.randomUUID().toString();
         pending.put(id, new Pending<>(recType, cmd));
-        String payload = envelopeBuilder.buildRequest(id, cmd, token, dataPas);
+        String payload = envelopeBuilder.buildRequest(id, username ,cmd, token, dataPas);
         transport.addString(payload); // one-line JSON; WriterTCP appends '\n'
         return id;
     }
 
     @Override public void accept(String rawLine) {
         try {
+
             var root = json.readTree(rawLine);
             var kind = KindOfCommunication
                     .valueOf(root.path("kindOfCommunication").asText());
@@ -79,9 +85,12 @@ public final class ProtocolProcessor implements
             Pending<?> p = pending.remove(id);
             if (p == null) return;
 
+
             completeTypedAndDispatch(id, p, root);
 
-        } catch (Exception ignore) { /* optionally log */ }
+        } catch (Exception ignore) {
+
+        }
     }
 
     private <R> void completeTypedAndDispatch(String id, Pending<R> p, JsonNode root) {
@@ -92,7 +101,7 @@ public final class ProtocolProcessor implements
             EnvelopeData<Void, R> env = json.convertValue(root, envType);
             listener.onResponse(id, p.cmd, env);
         } catch (Exception ex) {
-            // If deserialization fails, you can route an error envelope or log it.
+            System.out.println(ex.getMessage());
         }
     }
 

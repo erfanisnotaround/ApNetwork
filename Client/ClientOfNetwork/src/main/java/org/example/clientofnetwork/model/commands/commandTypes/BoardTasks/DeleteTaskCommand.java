@@ -8,7 +8,7 @@ import org.example.clientofnetwork.model.passingAndRecievingData.client.ClientIn
 import org.example.clientofnetwork.model.passingAndRecievingData.sameInfoes.CommandType;
 import org.example.clientofnetwork.model.responseTypes.responseBoardInfo.DeleteTaskDataRes;
 
-public class DeleteTaskCommand implements Commendable<DeleteTaskDataRes , DeleteTasksInfo> {
+public class DeleteTaskCommand implements Commendable<DeleteTasksInfo , DeleteTaskDataRes> {
     @Override
     public CommandType type() {
         return null;

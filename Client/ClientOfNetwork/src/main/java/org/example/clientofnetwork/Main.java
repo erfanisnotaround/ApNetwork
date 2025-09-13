@@ -4,17 +4,18 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.example.clientofnetwork.controller.WiringChangeable;
+import org.example.clientofnetwork.model.agents.screenChanging.SceneManager;
+import org.example.clientofnetwork.model.sceneInformation.GoingToLoginFromScratch;
 
 public class Main extends Application {
 
     @Override public void start(Stage stage) throws Exception {
-        var fxml = new FXMLLoader(getClass().getResource("/app/client/ui/MainView.fxml"));
-        stage.setScene(new Scene(fxml.load()));
-        stage.setTitle("TodoNet – Connect");
-        stage.show();
 
         WiringChangeable.Result result = WiringChangeable.boot();
+        SceneManager manager = new SceneManager(stage);
 
+        stage.show();
+        manager.switchScreen(PositionStatus.LOGIN_VIEW , new GoingToLoginFromScratch(result.commandManager() , result.info()));
     }
     public static void main(String[] args){ launch(args); }
 }

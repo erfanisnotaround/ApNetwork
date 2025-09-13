@@ -6,7 +6,23 @@ import java.util.EnumMap;
 import java.util.Map;
 
 public final class CommandBus {
-    private final Map<CommandType, CommandHandler> handlers = new EnumMap<>(CommandType.class);
-    public void register(CommandType type, CommandHandler h){ handlers.put(type, h); }
-    public CommandHandler lookup(CommandType t){ return handlers.get(t); }
+    public static final class Binding<P,R> {
+        public final Class<P> passType;
+        public final Class<R> resType;
+        public final CommandHandler<P,R> handler;
+        Binding(Class<P> p, Class<R> r, CommandHandler<P,R> h) {
+            this.passType = p; this.resType = r; this.handler = h;
+        }
+    }
+
+    private final Map<CommandType, Binding<?,?>> map = new EnumMap<>(CommandType.class);
+
+    public <P,R> void register(CommandType t, Class<P> p, Class<R> r, CommandHandler<P,R> h) {
+        map.put(t, new Binding<>(p, r, h));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <P,R> Binding<P,R> binding(CommandType t) {
+        return (Binding<P,R>) map.get(t);
+    }
 }

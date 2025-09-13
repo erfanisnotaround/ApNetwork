@@ -27,7 +27,9 @@ public class ReaderTCP implements Runnable {
         try {
             String line;
             while (running.get() && (line = reader.readLine()) != null) {
+                System.out.println(line);
                 onLine.accept(line);
+
             }
         } catch (IOException ignore) {
         } finally { running.set(false); }

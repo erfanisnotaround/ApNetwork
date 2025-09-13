@@ -33,7 +33,7 @@ public final class FileUsersRepo implements UsersRepo {
         rw.writeLock().lock();
         try {
             if (byName.containsKey(username)) return null;
-            User u = new User(UUID.randomUUID().toString(), username, salt, passHash);
+            User u = new User(UUID.randomUUID().toString(), username, salt, passHash , UUID.randomUUID().toString());
             byId.put(u.getId(), u); byName.put(u.getUsername(), u);
             persistUnsafe(); return u;
         } finally { rw.writeLock().unlock(); }

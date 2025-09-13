@@ -34,13 +34,14 @@ public final class CommandManager implements ResponseListener {
         this.notifySink = (sink != null ? sink : n -> {});
     }
 
-    public <R,T> void send(Commendable<R,T> cmd, T data) {
+    public <T , R> void send(Commendable<T , R> cmd, T data) {
         Object args = cmd.buildArgs(info, data);
+
         String id = processor.sendReactive(cmd.type(), args, cmd.responseType());
         inflight.put(id, new Registered(cmd, cmd.responseType()));
     }
 
-    /* ===== ResponseListener callbacks ===== */
+
 
     @Override
     public void onNotify(EnvelopeData<Void, JsonNode> env) {
@@ -62,7 +63,6 @@ public final class CommandManager implements ResponseListener {
         } else if (CommandResponseStatus.FAILURE.equals(env.getStatus())) {
             cmd.onFailure((EnvelopeData) env, info);
         } else {
-            // Unknown status — you could treat as failure or log
         }
     }
 }

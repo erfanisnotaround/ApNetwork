@@ -1,4 +1,4 @@
 package org.example.clientofnetwork.model.responseTypes;
 
-public class RegisterDataRes {
+public class ViewBoardRes {
 }

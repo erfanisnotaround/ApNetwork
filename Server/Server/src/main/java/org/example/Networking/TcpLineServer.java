@@ -33,7 +33,7 @@ public final class TcpLineServer implements LineServer {
 
     @Override public void close() { running=false; pool.shutdownNow(); }
 
-    private static final class TcpSession implements LineServer.Session {
+    private static final class TcpSession implements Session {
         private final Socket socket; private final BufferedReader in; private final BufferedWriter out;
         private final BlockingQueue<String> outbound = new LinkedBlockingQueue<>();
         private volatile boolean running = true;
@@ -54,7 +54,7 @@ public final class TcpLineServer implements LineServer {
             writer.setDaemon(true); writer.start();
 
             try {
-                String line;
+                String line ;
                 while (running && (line = in.readLine()) != null) onLine.accept(line);
             } catch (IOException ignore) { } finally { running=false; try{socket.close();}catch(Exception ignore){} }
         }

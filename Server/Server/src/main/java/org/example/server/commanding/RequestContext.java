@@ -20,30 +20,32 @@ public final class RequestContext {
         this.session = s; this.sessions = sessions; this.services = services; this.io = io;
     }
 
-    public <P, R> void ok(EnvelopeData<P, R> env, R dataRec, String msg) {io.respondOk(session, env, dataRec, msg);}
+    public <P, R> void ok(EnvelopeData<P, R> env, R dataRec, String msg) { io.respondOk(session, env, dataRec, msg); }
+    public <P, R> void fail(EnvelopeData<P, R> env, String code, String msg) { io.respondFail(session, env, code, msg); }
+    public void notify(Set<LineServer.Session> targets, Object data, String msg) { services.notifier.notifyTo(targets, data, msg); }
 
-    public <P, R> void fail(EnvelopeData<P, R> env, String code, String msg) {io.respondFail(session, env, code, msg);}
-    public void notify(Set<LineServer.Session> targets, Object data, String msg){ services.notifier.notifyTo(targets, data, msg); }
-
-    // auth helper
+    /** Session-only auth: used by ALL commands EXCEPT LOGIN. */
     public User requireUser(EnvelopeData<?,?> env) {
-        String userId = services.tokens.verify(env.getToken());
-        if (userId == null) { fail(env, "unauth", "invalid_or_expired_token"); return null; }
-        var u = services.users.byId(userId);
-        if (u == null) { fail(env, "unauth", "unknown_user"); return null; }
-
-        // make sure Sessions knows this socket == this user
-        sessions.attachUser(session, userId);
+        String uid = sessions.userIdOf(session);
+        if (uid == null) {
+            fail(env, "unauth", "login_required");
+            return null;
+        }
+        User u = services.users.byId(uid);
+        if (u == null) {
+            sessions.detach(session); // clear stale binding
+            fail(env, "unauth", "unknown_user");
+            return null;
+        }
         return u;
     }
+
     public Set<LineServer.Session> onlineMembersOfBoard(String boardId) {
         var b = services.boards.byId(boardId);
         if (b == null) return Set.of();
 
         var targets = new HashSet<LineServer.Session>(sessions.sessionsOfUser(b.getOwnerId()));
-        for (String uid : b.getMembers()) {
-            targets.addAll(sessions.sessionsOfUser(uid));
-        }
+        for (String uid : b.getMembers()) targets.addAll(sessions.sessionsOfUser(uid));
         return targets;
     }
 }

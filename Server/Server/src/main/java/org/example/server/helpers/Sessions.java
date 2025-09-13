@@ -6,14 +6,6 @@ import org.example.sameInfoes.UserPlaceState;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-
-import org.example.core.port.LineServer;
-import org.example.sameInfoes.UserPlaceState;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public final class Sessions {
 
@@ -38,9 +30,10 @@ public final class Sessions {
         byBoard.values().forEach(set -> set.remove(s));
     }
 
+    /** Return session context (create if missing). */
     public Ctx ctx(LineServer.Session s) { return ctxBySession.computeIfAbsent(s, k -> new Ctx()); }
 
-    /** Call after successful login (or in requireUser for safety) */
+    /** Bind this TCP session to a user after LOGIN. */
     public void attachUser(LineServer.Session s, String userId) {
         var c = ctx(s);
         String prev = c.userId;
@@ -52,7 +45,26 @@ public final class Sessions {
         byUser.computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet()).add(s);
     }
 
-    // === Strategy A (live viewers)
+    /** Unbind but keep the session alive (e.g., logout). */
+    public void detach(LineServer.Session s) {
+        var c = ctxBySession.get(s);
+        if (c == null) return;
+        if (c.userId != null) {
+            var set = byUser.get(c.userId);
+            if (set != null) set.remove(s);
+            c.userId = null;
+        }
+        c.place = UserPlaceState.LOGGING_IN;
+        c.currentBoardId = null;
+    }
+
+    /** Lookup logged-in userId for this session (null if not logged in). */
+    public String userIdOf(LineServer.Session s) {
+        var c = ctxBySession.get(s);
+        return (c != null ? c.userId : null);
+    }
+
+    // === Board subscriptions (as you had)
     public void subscribeBoard(String boardId, LineServer.Session s) {
         ctx(s).currentBoardId = boardId;
         byBoard.computeIfAbsent(boardId, k -> ConcurrentHashMap.newKeySet()).add(s);
@@ -67,7 +79,6 @@ public final class Sessions {
         return byBoard.getOrDefault(boardId, Set.of());
     }
 
-    // === Strategy B (online-by-user)
     public Set<LineServer.Session> sessionsOfUser(String userId) {
         return byUser.getOrDefault(userId, Set.of());
     }
@@ -75,4 +86,3 @@ public final class Sessions {
     public void setPlace(LineServer.Session s, UserPlaceState p) { ctx(s).place = p; }
     public void setBoard(LineServer.Session s, String boardId) { ctx(s).currentBoardId = boardId; }
 }
-

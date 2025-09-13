@@ -25,17 +25,19 @@ public class WiringChangeable {
     public static Result boot(){
 
 
-        NetConfig netConfig = new NetConfig();
+        ObjectMapper objectMapper = new ObjectMapper();
+        NetConfig netConfig = NetConfig.load(objectMapper);
 
         Socket socket;
         NetContext netContext;
 
         try {
-            socket = new Socket(netConfig.host, netConfig.port);
+
+
+            socket = new  Socket(netConfig.host, netConfig.port);
+
             netContext = new NetContext(socket);
 
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -43,12 +45,12 @@ public class WiringChangeable {
         LabelApplier labelApplier = new LabelApplier(labelManaging);
         ClientInfo clientInfo = new ClientInfo();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        Communicable communicable = new SenderAndGetter(netConfig.port , netConfig.host , netContext);
+        Communicable communicable = new SenderAndGetter(netContext);
         ProtocolProcessor processor = new ProtocolProcessor(objectMapper , communicable);
         CommandManager commandManager = new CommandManager(processor , clientInfo);
 
 
+        communicable.StartCommunicatingTCP();
         return new Result(labelApplier, commandManager, clientInfo);
     }
 }

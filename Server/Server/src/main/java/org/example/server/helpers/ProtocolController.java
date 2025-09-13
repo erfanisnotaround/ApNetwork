@@ -26,14 +26,17 @@ public class ProtocolController {
             try {
                 CommandType type = codec.peekCommandType(raw);
                 if (type == null) { writeBadJson(session, "missing/invalid commandType"); return; }
-                var handler = bus.lookup(type);
-                if (handler == null) { writeBadJson(session, "unknown command"); return; }
 
-                // We don’t need typed dataPas at the controller; handlers downcast as needed.
-                EnvelopeData<Object,Object> env = codec.read(raw, Object.class, Object.class);
+                var b = bus.binding(type);
+                if (b == null) { writeBadJson(session, "unknown command: " + type); return; }
+
+// ✅ typed decode
+                var env = codec.read(raw, b.passType, b.resType);
+
                 var ctx = new RequestContext(session, sessions, services, io);
-                handler.handle(ctx, env);
+                b.handler.handle(ctx, env);
             } catch (Exception ex) {
+
                 writeBadJson(session, ex.getMessage());
             }
         });

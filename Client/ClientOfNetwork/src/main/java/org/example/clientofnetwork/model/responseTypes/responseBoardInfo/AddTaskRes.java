@@ -1,9 +1,8 @@
-package org.example.passingInformation.exit;
+package org.example.clientofnetwork.model.responseTypes.responseBoardInfo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.example.task.TaskItem;
-
+import org.example.clientofnetwork.model.task.TaskItem;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AddTaskRes {

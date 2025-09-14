@@ -7,12 +7,14 @@ import org.example.clientofnetwork.model.contexts.NetConfig;
 import org.example.clientofnetwork.model.contexts.NetContext;
 import org.example.clientofnetwork.model.listeningAndReading.Communicable;
 import org.example.clientofnetwork.model.listeningAndReading.SenderAndGetter;
+import org.example.clientofnetwork.model.listeningAndReading.UdpNotificationReceiver;
 import org.example.clientofnetwork.model.passingAndRecievingData.client.ClientInfo;
 import org.example.clientofnetwork.model.passingAndRecievingData.process.ProtocolProcessor;
 import org.example.clientofnetwork.model.responseChangeMaker.LabelManaging;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 public class WiringChangeable {
@@ -47,6 +49,13 @@ public class WiringChangeable {
 
         Communicable communicable = new SenderAndGetter(netContext);
         ProtocolProcessor processor = new ProtocolProcessor(objectMapper , communicable);
+        UdpNotificationReceiver udpNotificationReceiver = new UdpNotificationReceiver(9090);
+        udpNotificationReceiver.setOnMessage(processor);
+        try {
+            udpNotificationReceiver.start();
+        } catch (SocketException e) {
+            throw new RuntimeException(e);
+        }
         CommandManager commandManager = new CommandManager(processor , clientInfo);
 
 

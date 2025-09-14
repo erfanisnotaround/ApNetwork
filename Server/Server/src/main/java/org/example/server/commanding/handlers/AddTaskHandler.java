@@ -17,12 +17,12 @@ public final class AddTaskHandler implements CommandHandler<AddTaskPass , AddTas
     @Override public void handle(RequestContext ctx, EnvelopeData<AddTaskPass,AddTaskRes> env) {
         var user = ctx.requireUser(env); if (user==null) return;
         AddTaskPass p = (AddTaskPass) env.getDataPas();
-        String boardId = p.boardId;
+        String boardId = p.getBoardId();
         var b = ctx.services.boards.byId(boardId);
         if (b == null) { ctx.fail(env,"no_board","board not found"); return; }
         if (!AccessControl.mayMutateBoard(user,b)) { ctx.fail(env,"forbidden","no_access_to_board"); return; }
-        var pri = TaskPriority.valueOf(p.priority);
-        var t = ctx.services.tasks.add(boardId, String.valueOf(p.title), String.valueOf(p.description), pri);
+        var pri = p.getPriority();
+        var t = ctx.services.tasks.add(boardId, String.valueOf(p.getTitle()), String.valueOf(p.getDescription()), pri);
         ctx.<AddTaskPass , AddTaskRes> ok(env, env.dataRec, "task_added");
         ctx.notify(ctx.sessions.subscribers(boardId), Map.of("taskID", t.getId()), "task_added");
     }

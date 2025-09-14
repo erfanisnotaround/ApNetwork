@@ -18,7 +18,7 @@ public final class SenderAndGetter implements Communicable, AutoCloseable {
     // Blocks when empty → no polling, no sleeps
     private final LinkedBlockingQueue<String> outbound = new LinkedBlockingQueue<>();
 
-    // Shared on/off flag for both runnables
+
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     private WriterTCP writerRunnable;
@@ -44,7 +44,7 @@ public final class SenderAndGetter implements Communicable, AutoCloseable {
         if (readerRunnable != null) readerRunnable.setOnLine(this.lineProcessor);
     }
 
-    /** Start two blocking threads (reader: readLine, writer: queue.take). No timers. */
+
     @Override
     public void StartCommunicatingTCP() {
         if (!running.compareAndSet(false, true)) return;

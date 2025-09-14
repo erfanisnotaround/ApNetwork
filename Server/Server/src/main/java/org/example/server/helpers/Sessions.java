@@ -3,6 +3,9 @@ package org.example.server.helpers;
 import org.example.core.port.LineServer;
 import org.example.sameInfoes.UserPlaceState;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,6 +21,9 @@ public final class Sessions {
     private final ConcurrentHashMap<LineServer.Session, Ctx> ctxBySession = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<LineServer.Session>> byUser  = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<LineServer.Session>> byBoard = new ConcurrentHashMap<>();
+
+    private final Map<LineServer.Session, InetAddress> peerIp = new ConcurrentHashMap<>();
+    private final Map<LineServer.Session, Integer>     udpPort = new ConcurrentHashMap<>();
 
     public void add(LineServer.Session s) { ctxBySession.put(s, new Ctx()); }
 
@@ -64,7 +70,7 @@ public final class Sessions {
         return (c != null ? c.userId : null);
     }
 
-    // === Board subscriptions (as you had)
+
     public void subscribeBoard(String boardId, LineServer.Session s) {
         ctx(s).currentBoardId = boardId;
         byBoard.computeIfAbsent(boardId, k -> ConcurrentHashMap.newKeySet()).add(s);
@@ -82,6 +88,24 @@ public final class Sessions {
     public Set<LineServer.Session> sessionsOfUser(String userId) {
         return byUser.getOrDefault(userId, Set.of());
     }
+    public void setPeerIp(LineServer.Session s, InetAddress ip) {
+        if (s != null && ip != null) peerIp.put(s, ip);
+    }
+    public void registerUdpPort(LineServer.Session s, int port) {
+        if (s != null && port > 0 && port <= 65535) udpPort.put(s, port);
+    }
+
+    public InetSocketAddress udpEndpointOf(LineServer.Session s) {
+        var ip = peerIp.get(s); var port = udpPort.get(s);
+        return (ip != null && port != null) ? new InetSocketAddress(ip, port) : null;
+    }
+
+    public void onClose(LineServer.Session s) {
+
+        peerIp.remove(s); udpPort.remove(s);
+    }
+
+
 
     public void setPlace(LineServer.Session s, UserPlaceState p) { ctx(s).place = p; }
     public void setBoard(LineServer.Session s, String boardId) { ctx(s).currentBoardId = boardId; }

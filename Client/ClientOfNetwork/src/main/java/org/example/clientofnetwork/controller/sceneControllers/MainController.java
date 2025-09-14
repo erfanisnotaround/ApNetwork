@@ -1,6 +1,7 @@
 // org/example/clientofnetwork/controller/sceneControllers/MainController.java
 package org.example.clientofnetwork.controller.sceneControllers;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -26,6 +27,8 @@ import java.util.function.Consumer;
 public final class MainController implements Maker, ControlledScreen,
         DataReceivingController<MainController.Data>, MainModel.View {
 
+
+
     /** Only pass what the scene truly needs to start (DIP). */
     public static final class Data {
         public final CommandManager commandManager;
@@ -39,7 +42,6 @@ public final class MainController implements Maker, ControlledScreen,
     @FXML private Button logoutBtn;
     @FXML private Button showBoardsBtn;
     @FXML private Button createBoardBtn; // <-- ensure in FXML
-
     private SceneManager scenes;
     private BoardListPane boardListPane;
     private MainModel model;
@@ -70,6 +72,13 @@ public final class MainController implements Maker, ControlledScreen,
             }
         });
 
+        commandManager.addNotifyListener(env ->
+                Platform.runLater(() -> {
+                    String msg = env.getMessage();
+                    if (msg == null && env.getDataRec() != null) msg = env.getDataRec().toString();
+                    statusLabel.setText(msg != null ? msg : "(notify)");
+                })
+        );
 
         // Right side buttons
         showBoardsBtn.setOnAction(e -> model.onShowBoards());
@@ -82,7 +91,7 @@ public final class MainController implements Maker, ControlledScreen,
     @Override public void showEmpty() { boardListPane.setBoards(List.of()); }
     @Override public void setSumCount(int n) { sumIndicator.setText("Boards: " + n); }
     @Override public void setStatus(String msg) { statusLabel.setText(msg); }
-    @Override public void openBoardScene(BoardSummary b) { scenes.switchScreen(PositionStatus.BOARD_VIEW); }
+    @Override public void openBoardScene(BoardSummary b) { scenes.switchScreen(PositionStatus.BOARD_VIEW , new BoardController.Data(commandManager , clientInfo , b)); }
 
     @Override public void openInviteDialog(BoardSummary board) {
         Window owner = scenes.getStage();

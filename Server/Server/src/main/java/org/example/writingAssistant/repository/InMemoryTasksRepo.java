@@ -3,6 +3,7 @@ package org.example.writingAssistant.repository;
 import org.example.core.domain.Task;
 import org.example.core.port.TasksRepo;
 import org.example.sameInfoes.TaskPriority;
+import org.example.sameInfoes.TaskStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,5 +19,15 @@ public final class InMemoryTasksRepo implements TasksRepo {
         var list = new ArrayList<Task>();
         for (var t: byId.values()) if (t.getBoardId().equals(boardId)) list.add(t);
         list.sort(java.util.Comparator.comparingLong(Task::getCreatedAt)); return list;
+    }
+
+    @Override
+    public Task updateStatus(String taskId, TaskStatus newStatus) {
+        return null;
+    }
+
+    @Override
+    public boolean delete(String taskId) {
+        return false;
     }
 }

@@ -1,14 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.clientofnetwork.controller.sceneControllers.BoardController"
-            prefHeight="400.0" prefWidth="600.0">
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.clientofnetwork.controller.sceneControllers.BoardController">
 
-</AnchorPane>
+    <center>
+        <SplitPane dividerPositions="0.45">
+            <items>
+                <!-- LEFT: tasks list -->
+                <VBox spacing="8">
+                    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                    <HBox spacing="8">
+                        <Button fx:id="addTaskBtn" text="Add Task"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="refreshBtn" text="Refresh"/>
+                    </HBox>
+                    <Separator/>
+                    <ScrollPane fitToWidth="true">
+                        <content>
+                            <VBox fx:id="leftContainer" spacing="6"/>
+                        </content>
+                    </ScrollPane>
+                </VBox>
+
+                <!-- RIGHT: selected task detail -->
+                <VBox spacing="10">
+                    <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+                    <children>
+                        <Label text="Task Details" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+                        <Separator/>
+                        <GridPane hgap="10" vgap="10">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="90"/>
+                                <ColumnConstraints hgrow="ALWAYS" />
+                            </columnConstraints>
+                            <children>
+                                <Label text="Title:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                <Label fx:id="titleValue" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                                <Label text="Description:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                <TextArea fx:id="descValue" GridPane.rowIndex="1" GridPane.columnIndex="1" prefRowCount="5" editable="false"/>
+
+                                <Label text="Priority:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                <Label fx:id="prioValue" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                                <Label text="Status:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                <ComboBox fx:id="statusBox" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                            </children>
+                        </GridPane>
+                        <HBox spacing="8">
+                            <Button fx:id="deleteBtn" text="🗑 Delete"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label text="Status:"/>
+                            <Label fx:id="statusLabel"/>
+                        </HBox>
+                    </children>
+                </VBox>
+            </items>
+        </SplitPane>
+    </center>
+</BorderPane>

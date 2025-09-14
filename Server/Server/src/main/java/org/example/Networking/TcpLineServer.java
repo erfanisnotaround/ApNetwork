@@ -4,6 +4,7 @@ package org.example.Networking;
 import org.example.core.port.LineServer;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
@@ -61,6 +62,12 @@ public final class TcpLineServer implements LineServer {
 
         @Override public void setLineHandler(Consumer<String> onLine) { this.onLine = (onLine!=null?onLine:s->{}); }
         @Override public void sendLine(String oneLineJson) { if (running) outbound.offer(oneLineJson); }
+
+        @Override
+        public InetSocketAddress remoteAddress() {
+            return null;
+        }
+
         @Override public void close() { running=false; try{socket.close();}catch(Exception ignore){} }
     }
 }

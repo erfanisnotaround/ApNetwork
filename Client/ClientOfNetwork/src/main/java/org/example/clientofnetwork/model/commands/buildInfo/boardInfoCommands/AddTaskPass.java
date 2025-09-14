@@ -1,8 +1,10 @@
-package org.example.passingInformation.entry;
+package org.example.clientofnetwork.model.commands.buildInfo.boardInfoCommands;
+
+import org.example.clientofnetwork.model.passingAndRecievingData.sameInfoes.TaskPriority;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.example.sameInfoes.TaskPriority;
+
 
 
 public class AddTaskPass {

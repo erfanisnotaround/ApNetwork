@@ -22,7 +22,7 @@ public final class RequestContext {
 
     public <P, R> void ok(EnvelopeData<P, R> env, R dataRec, String msg) { io.respondOk(session, env, dataRec, msg); }
     public <P, R> void fail(EnvelopeData<P, R> env, String code, String msg) { io.respondFail(session, env, code, msg); }
-    public void notify(Set<LineServer.Session> targets, Object data, String msg) { services.notifier.notifyTo(targets, data, msg); }
+    public void notify(Set<LineServer.Session> targets , Object data, String msg) { services.notifier.notifyTo(targets, data, msg); }
 
     /** Session-only auth: used by ALL commands EXCEPT LOGIN. */
     public User requireUser(EnvelopeData<?,?> env) {

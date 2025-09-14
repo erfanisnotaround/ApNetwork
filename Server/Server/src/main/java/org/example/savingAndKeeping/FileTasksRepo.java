@@ -53,16 +53,18 @@ public final class FileTasksRepo implements TasksRepo {
     }
 
     // Optional: updates
-    public boolean updateStatus(String taskId, TaskStatus s){
+    @Override
+    public Task updateStatus(String taskId, TaskStatus s){
         rw.writeLock().lock();
         try {
-            var t = byId.get(taskId); if (t==null) return false;
+            var t = byId.get(taskId);
             t.setStatus(s);
             persistUnsafe();
-            return true;
+            return t;
         } finally { rw.writeLock().unlock(); }
     }
 
+    @Override
     public boolean delete(String taskId){
         rw.writeLock().lock();
         try {

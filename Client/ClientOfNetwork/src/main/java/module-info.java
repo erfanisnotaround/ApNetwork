@@ -28,4 +28,7 @@ module org.example.clientofnetwork {
     opens org.example.clientofnetwork.model.responseTypes to com.fasterxml.jackson.databind;
     opens org.example.clientofnetwork.model.boardRelated to com.fasterxml.jackson.databind;
     opens org.example.clientofnetwork.controller.sceneControllers to javafx.fxml;
+    exports org.example.clientofnetwork.model.task to com.fasterxml.jackson.databind;
+    exports org.example.clientofnetwork.model.commands.buildInfo.boardInfoCommands to com.fasterxml.jackson.databind;
+    exports org.example.clientofnetwork.model.responseTypes.responseBoardInfo to com.fasterxml.jackson.databind;
 }

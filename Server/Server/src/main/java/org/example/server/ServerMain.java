@@ -21,9 +21,9 @@ public final class ServerMain {
         // Infra
         LineServer tcp = new TcpLineServer(8080);
         EnvelopeCodec codec = new JacksonEnvelopeCodec();
-        var services = getServices(codec);
-        var sessions = new Sessions();
 
+        var sessions = new Sessions();
+        var services = getServices(codec , sessions);
         // Command bus + handlers (OCP)
         var bus = new CommandBus();
         bus.register(CommandType.LOGIN,        LoginPass.class,       LoginRes.class,       new LoginHandler());
@@ -33,7 +33,9 @@ public final class ServerMain {
         bus.register(CommandType.ADD_TASK,     AddTaskPass.class,     AddTaskRes.class,     new AddTaskHandler());
         bus.register(CommandType.REGISTER , RegisterPass.class,       RegisterRes.class,     new RegisterHandler());
         bus.register(CommandType.ADD_USER_TO_BOARD , AddingUserToTheBoardPass.class, AddingUserToTheBoardRes.class, new AddingUserToTheBoardHandler());
-// … etc
+        bus.register(CommandType.LIST_TASKS , ListTasksPass.class,   ListTasksRes.class, new ListTasksHandler());
+        bus.register(CommandType.UPDATE_TASK_STATUS , UpdateTaskStatusPass.class,  UpdateTaskStatusRes.class, new UpdateTaskStatusHandler());
+        bus.register(CommandType.DELETE_TASK , DeleteTaskPass.class,       DeleteTaskRes.class, new DeleteTaskHandler());
 
         // bus.register(CommandType.LIST_TASKS, new ListTasksHandler()); etc.
 
@@ -45,10 +47,10 @@ public final class ServerMain {
         System.out.println("Server up on :8080");
     }
 
-    private static Services getServices(EnvelopeCodec codec) {
-        NotificationPublisher notifier = new TcpNotificationPublisher(codec);
+    private static Services getServices(EnvelopeCodec codec , Sessions sessions) {
+        NotificationPublisher notifier = new UdpNotificationPublisher(codec , sessions);
 
-        var mapper  = new ObjectMapper();
+        var mapper  = new ObjectMapper().findAndRegisterModules();
         var dataDir = Path.of("data");
 
         UsersRepo users = new FileUsersRepo(dataDir , mapper);
